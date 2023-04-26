@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import { useEffect, useState } from "react";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
+import scrollToBottom from "@/utils/scrollToBottom";
+import scrollToTop from "@/utils/scrollToTop";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,13 +47,11 @@ export default function Home() {
   };
 
   const csvFileToArray = (string) => {
-    console.log(string);
-    const delimiter = string.toString().includes("\r\n") ? "\r\n" : "\n";
-    var array = string.toString().split(delimiter);
-    console.log(array);
+    const delimiter = string.includes("\r\n") ? "\r\n" : "\n";
+    var array = string.split(delimiter);
     var data = [];
     for (const r of array) {
-      let row = r.toString().split(",");
+      let row = r.split(",");
       data.push(row);
     }
     var heading = data[0];
@@ -63,10 +63,7 @@ export default function Home() {
       for (var j = 1; j < heading.length; j++) {
         if (row[j] != "") {
           obj.trait_type = heading[j].replaceAll(" ", "_").replaceAll("\b", "");
-          obj.value = row[j]
-            .toString()
-            .replaceAll(" ", "_")
-            .replaceAll("\b", "");
+          obj.value = row[j].replaceAll(" ", "_").replaceAll("\b", "");
 
           attributes.push(JSON.parse(JSON.stringify(obj)));
         }
@@ -153,9 +150,11 @@ export default function Home() {
                 Download in multiple files
               </button>
             </div>
+            <button onClick={scrollToBottom}>⬇️ Scroll to bottom</button>
             <pre className="flex flex-col items-center justify-center text-sm">
               {json && JSON.stringify(json, null, 2)}
             </pre>
+            <button onClick={scrollToTop}>⬆️ Scroll to top</button>
           </div>
         )}
 
