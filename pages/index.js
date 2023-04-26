@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import { Inter } from "next/font/google";
 import { useEffect, useState } from "react";
 import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -44,7 +45,10 @@ export default function Home() {
   };
 
   const csvFileToArray = (string) => {
-    var array = string.toString().split("\r\n");
+    console.log(string);
+    const delimiter = string.toString().includes("\r\n") ? "\r\n" : "\n";
+    var array = string.toString().split(delimiter);
+    console.log(array);
     var data = [];
     for (const r of array) {
       let row = r.toString().split(",");
@@ -58,8 +62,11 @@ export default function Home() {
       var attributes = [];
       for (var j = 1; j < heading.length; j++) {
         if (row[j] != "") {
-          obj.trait_type = heading[j].replaceAll(" ", "_");
-          obj.value = row[j].toString().replaceAll(" ", "_");
+          obj.trait_type = heading[j].replaceAll(" ", "_").replaceAll("\b", "");
+          obj.value = row[j]
+            .toString()
+            .replaceAll(" ", "_")
+            .replaceAll("\b", "");
 
           attributes.push(JSON.parse(JSON.stringify(obj)));
         }
@@ -79,12 +86,22 @@ export default function Home() {
 
   const handleOnSubmit = (e) => {
     e.preventDefault();
-    if (file) {
+    if (file.name.includes(".csv")) {
       fileReader.onload = function (event) {
         const text = event.target.result;
         csvFileToArray(text);
       };
       fileReader.readAsText(file);
+    } else if (file.name.includes(".xlsx")) {
+      fileReader.onload = function (e) {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const text = XLSX.utils.sheet_to_csv(worksheet, { header: 1 });
+        csvFileToArray(text);
+      };
+      fileReader.readAsBinaryString(file);
     }
   };
 
@@ -169,15 +186,15 @@ export default function Home() {
             onChange={handleLicenseChange}
           />
           <div className="flex items-center justify-center gap-1">
-            <label>CSV File: </label>
+            <label>Upload .csv or .xlsx ➡️ </label>
             <input type="file" onChange={handleFileChange} />
+            <button
+              onClick={handleOnSubmit}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Convert
+            </button>
           </div>
-          <button
-            onClick={handleOnSubmit}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Convert
-          </button>
         </form>
       </div>
     </main>
