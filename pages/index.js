@@ -63,7 +63,7 @@ export default function Home() {
       for (var j = 1; j < heading.length; j++) {
         if (row[j] != "") {
           obj.trait_type = heading[j].replaceAll("\b", "");
-          obj.value = row[j].replaceAll("\b", "");
+          obj.value = row[j].replaceAll("\b", "").replaceAll("_", " ");
 
           attributes.push(JSON.parse(JSON.stringify(obj)));
         }
@@ -71,7 +71,9 @@ export default function Home() {
       result.push({
         name: name + " #" + row[0],
         external_url: RMNTUrl,
-        image: imageUrl,
+        image: imageUrl.endsWith("/")
+          ? imageUrl + row[0] + ".png"
+          : imageUrl + "/" + row[0] + ".png",
         artist: artist,
         license: license,
         attributes: attributes,
@@ -108,7 +110,7 @@ export default function Home() {
       type: "text/plain",
     });
     element.href = URL.createObjectURL(file);
-    element.download = "json.json";
+    element.download = name + "_meta_json";
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
   };
@@ -119,10 +121,10 @@ export default function Home() {
       const file = new Blob([JSON.stringify(json[i], null, 2)], {
         type: "text/plain",
       });
-      zip.file(json[i].name.split("#")[1] + ".json", file);
+      zip.file(i, file);
     }
     zip.generateAsync({ type: "blob" }).then(function (content) {
-      saveAs(content, "json.zip");
+      saveAs(content, name + "_meta_json.zip");
     });
   };
 
