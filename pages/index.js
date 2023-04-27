@@ -62,8 +62,8 @@ export default function Home() {
       var attributes = [];
       for (var j = 1; j < heading.length; j++) {
         if (row[j] != "") {
-          obj.trait_type = heading[j].replaceAll(" ", "_").replaceAll("\b", "");
-          obj.value = row[j].replaceAll(" ", "_").replaceAll("\b", "");
+          obj.trait_type = heading[j].replaceAll("\b", "");
+          obj.value = row[j].replaceAll("\b", "");
 
           attributes.push(JSON.parse(JSON.stringify(obj)));
         }
